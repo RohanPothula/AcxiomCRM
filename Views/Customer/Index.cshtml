@@ -1,0 +1,124 @@
+@model IEnumerable<AcxiomCRM.Models.Customer>
+@{
+    ViewData["Title"] = "Customer Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold mb-0">Customers</h4>
+        <div class="text-muted small">Manage client master accounts, contact info, and business history</div>
+    </div>
+    <a asp-action="Create" class="btn btn-primary-crm">
+        <i class="bi bi-person-plus me-1"></i> New Customer
+    </a>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card-clean p-3 mb-3">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by name, email, phone, company..." />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select form-select-sm">
+                <option value="">All Statuses</option>
+                <option value="Active" selected="@(ViewBag.Status == "Active")">Active</option>
+                <option value="Inactive" selected="@(ViewBag.Status == "Inactive")">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-sm btn-primary-crm">Filter</button>
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Table Card -->
+<div class="card-clean">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-people"></i>
+            <div class="empty-state-title">No customers found</div>
+            <div class="small">Try adjusting search criteria or create a new customer record.</div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-crm">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.NameSortParm" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status" class="text-decoration-none text-dark">
+                                Customer Name <i class="bi bi-arrow-down-up small"></i>
+                            </a>
+                        </th>
+                        <th>Company</th>
+                        <th>Contact</th>
+                        <th>Status</th>
+                        <th>Owner</th>
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.DateSortParm" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status" class="text-decoration-none text-dark">
+                                Created <i class="bi bi-arrow-down-up small"></i>
+                            </a>
+                        </th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        <tr>
+                            <td class="font-monospace small text-muted">@c.CustomerCode</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@c.CustomerId" class="fw-semibold text-decoration-none text-primary">
+                                    @c.CustomerName
+                                </a>
+                            </td>
+                            <td>@(c.CompanyName ?? "-")</td>
+                            <td class="small">
+                                <div>@c.Email</div>
+                                <div class="text-muted">@c.Phone</div>
+                            </td>
+                            <td>
+                                <span class="badge-clean @(c.Status == "Active" ? "badge-active" : "badge-inactive")">
+                                    @c.Status
+                                </span>
+                            </td>
+                            <td class="small">@(c.Owner != null ? c.Owner.FullName : "Unassigned")</td>
+                            <td class="small text-muted">@c.CreatedDate.ToString("dd MMM yyyy")</td>
+                            <td class="text-end">
+                                <a asp-action="Edit" asp-route-id="@c.CustomerId" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="Details" asp-route-id="@c.CustomerId" class="btn btn-sm btn-outline-primary py-0 px-2" title="Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="p-3 border-top d-flex justify-content-between align-items-center">
+                <span class="small text-muted">Page @ViewBag.CurrentPage of @ViewBag.TotalPages</span>
+                <ul class="pagination pagination-sm mb-0">
+                    @for (int p = 1; p <= ViewBag.TotalPages; p++)
+                    {
+                        <li class="page-item @(p == ViewBag.CurrentPage ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status" asp-route-sortOrder="@ViewBag.CurrentSort">@p</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+</div>

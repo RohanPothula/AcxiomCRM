@@ -1,0 +1,160 @@
+@using Microsoft.AspNetCore.Identity
+@using AcxiomCRM.Models
+@using AcxiomCRM.Services
+@inject IUserService UserService
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var primaryRole = currentUser != null ? await UserService.GetPrimaryRoleAsync(currentUser) : "";
+    bool isAdmin = primaryRole == Roles.Admin;
+    bool isManager = primaryRole == Roles.Manager;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " - AcxiomCRM" : "AcxiomCRM - Enterprise Customer & Sales Management")</title>
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="app-container">
+            <!-- Sidebar Navigation -->
+            <aside class="app-sidebar">
+                <div class="sidebar-header">
+                    <a asp-controller="Dashboard" asp-action="Index" class="sidebar-brand">
+                        <svg width="24" height="24" viewBox="0 0 64 64" fill="none">
+                            <rect width="64" height="64" rx="8" fill="#1e293b"/>
+                            <path d="M14 48 L32 14 L50 48 Z" stroke="#38bdf8" stroke-width="6"/>
+                            <line x1="22" y1="36" x2="42" y2="36" stroke="#60a5fa" stroke-width="5"/>
+                        </svg>
+                        <span>AcxiomCRM</span>
+                    </a>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-section-title">Core</div>
+                    <a asp-controller="Dashboard" asp-action="Index" class="nav-item-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <div class="nav-section-title">CRM & Sales</div>
+                    <a asp-controller="Customer" asp-action="Index" class="nav-item-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Customer" ? "active" : "")">
+                        <i class="bi bi-people"></i>
+                        <span>Customers</span>
+                    </a>
+                    <a asp-controller="Lead" asp-action="Index" class="nav-item-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Lead" ? "active" : "")">
+                        <i class="bi bi-funnel"></i>
+                        <span>Leads</span>
+                    </a>
+                    <a asp-controller="Opportunity" asp-action="Index" class="nav-item-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Opportunity" ? "active" : "")">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>Opportunities</span>
+                    </a>
+                    <a asp-controller="FollowUp" asp-action="Index" class="nav-item-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "FollowUp" ? "active" : "")">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>Follow-Ups</span>
+                    </a>
+                    <a asp-controller="Activity" asp-action="Index" class="nav-item-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Activity" ? "active" : "")">
+                        <i class="bi bi-clock-history"></i>
+                        <span>Activities</span>
+                    </a>
+
+                    <div class="nav-section-title">Analytics</div>
+                    <a asp-controller="Reports" asp-action="Index" class="nav-item-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Reports" ? "active" : "")">
+                        <i class="bi bi-file-earmark-bar-graph"></i>
+                        <span>Reports</span>
+                    </a>
+
+                    @if (isAdmin)
+                    {
+                        <div class="nav-section-title">Administration</div>
+                        <a asp-controller="Users" asp-action="Index" class="nav-item-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Users" ? "active" : "")">
+                            <i class="bi bi-person-gear"></i>
+                            <span>User Management</span>
+                        </a>
+                        <a asp-controller="AuditLog" asp-action="Index" class="nav-item-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "AuditLog" ? "active" : "")">
+                            <i class="bi bi-journal-text"></i>
+                            <span>Audit Log</span>
+                        </a>
+                    }
+                </nav>
+            </aside>
+
+            <!-- Main App Area -->
+            <div class="app-main">
+                <header class="app-topbar">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="fw-semibold text-secondary">AcxiomCRM</span>
+                        <span class="text-muted">|</span>
+                        <span class="badge bg-light text-dark border">@primaryRole</span>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="text-end d-none d-sm-block">
+                            <div class="fw-semibold small">@(currentUser?.FullName ?? currentUser?.UserName)</div>
+                            <div class="text-muted small">@currentUser?.Email</div>
+                        </div>
+
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </header>
+
+                <main class="app-content">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show py-2 px-3 small mb-3" role="alert">
+                            <i class="bi bi-check-circle me-1"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show py-2 px-3 small mb-3" role="alert">
+                            <i class="bi bi-exclamation-triangle me-1"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    @RenderBody()
+                </main>
+
+                <footer class="app-footer">
+                    <div>
+                        <strong>AcxiomCRM</strong> &copy; @DateTime.UtcNow.Year. Enterprise Customer and Sales Management.
+                    </div>
+                    <div>
+                        <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted me-3">Privacy Policy</a>
+                        <a asp-controller="Home" asp-action="Terms" class="text-decoration-none text-muted">Terms and Conditions</a>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="container-fluid p-0">
+            @RenderBody()
+        </div>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/chartjs/chart.umd.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

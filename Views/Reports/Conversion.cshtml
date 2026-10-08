@@ -1,0 +1,67 @@
+@model AcxiomCRM.ViewModels.ConversionReportViewModel
+@{
+    ViewData["Title"] = "Sales Conversion Report";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold mb-0">Conversion & Win Rate Report</h4>
+        <div class="text-muted small">Tracking lead conversion effectiveness and sales opportunity win ratios</div>
+    </div>
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-printer me-1"></i> Print / Export
+        </button>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to Reports</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card-clean p-4">
+            <h6 class="fw-bold text-uppercase small text-muted mb-3">Lead Conversion Metrics</h6>
+            <div class="d-flex align-items-baseline gap-2 mb-2">
+                <span class="fs-1 fw-bold text-success">@Model.ConversionRate%</span>
+                <span class="text-muted small">Overall Conversion Rate</span>
+            </div>
+            <div class="row border-top pt-3 mt-3">
+                <div class="col-4">
+                    <div class="text-muted small">Total Leads</div>
+                    <div class="fs-5 fw-bold">@Model.TotalLeads</div>
+                </div>
+                <div class="col-4">
+                    <div class="text-muted small">Converted</div>
+                    <div class="fs-5 fw-bold text-success">@Model.ConvertedLeads</div>
+                </div>
+                <div class="col-4">
+                    <div class="text-muted small">Unconverted</div>
+                    <div class="fs-5 fw-bold text-muted">@Model.UnconvertedLeads</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card-clean p-4">
+            <h6 class="fw-bold text-uppercase small text-muted mb-3">Opportunity Win Rate Metrics</h6>
+            <div class="d-flex align-items-baseline gap-2 mb-2">
+                <span class="fs-1 fw-bold text-primary">@Model.WinRate%</span>
+                <span class="text-muted small">Opportunity Win Rate</span>
+            </div>
+            <div class="row border-top pt-3 mt-3">
+                <div class="col-4">
+                    <div class="text-muted small">Total Deals</div>
+                    <div class="fs-5 fw-bold">@Model.TotalOpportunities</div>
+                </div>
+                <div class="col-4">
+                    <div class="text-muted small">Won Deals</div>
+                    <div class="fs-5 fw-bold text-success">@Model.WonOpportunities</div>
+                </div>
+                <div class="col-4">
+                    <div class="text-muted small">Lost Deals</div>
+                    <div class="fs-5 fw-bold text-danger">@Model.LostOpportunities</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

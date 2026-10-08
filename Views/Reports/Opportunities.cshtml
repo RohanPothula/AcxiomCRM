@@ -1,0 +1,87 @@
+@model IEnumerable<AcxiomCRM.ViewModels.OpportunityReportItem>
+@{
+    ViewData["Title"] = "Opportunity Report";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold mb-0">Opportunity Report</h4>
+        <div class="text-muted small">Pipeline stage distributions, probabilities, and gross deal amounts</div>
+    </div>
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-printer me-1"></i> Print / Export
+        </button>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to Reports</a>
+    </div>
+</div>
+
+<div class="card-clean p-3 mb-3">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-3">
+            <select name="stage" class="form-select form-select-sm">
+                <option value="">All Stages</option>
+                @foreach (var st in AcxiomCRM.Models.OpportunityStages.All)
+                {
+                    <option value="@st" selected="@(ViewBag.Stage == st)">@st</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select form-select-sm">
+                <option value="">All Statuses</option>
+                <option value="Open" selected="@(ViewBag.Status == "Open")">Open</option>
+                <option value="Won" selected="@(ViewBag.Status == "Won")">Won</option>
+                <option value="Lost" selected="@(ViewBag.Status == "Lost")">Lost</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-sm btn-primary-crm">Apply Filter</button>
+            <a asp-action="Opportunities" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
+<div class="card-clean">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-graph-up-arrow"></i>
+            <div class="empty-state-title">No opportunity data available for this report</div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-crm">
+                <thead>
+                    <tr>
+                        <th>Opportunity Name</th>
+                        <th>Customer</th>
+                        <th>Stage</th>
+                        <th>Deal Amount (₹)</th>
+                        <th>Win Probability</th>
+                        <th>Weighted Value (₹)</th>
+                        <th>Expected Close</th>
+                        <th>Sales Executive</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@o.OpportunityName</td>
+                            <td>@o.CustomerName</td>
+                            <td><span class="badge bg-light text-dark border">@o.Stage</span></td>
+                            <td class="fw-bold">₹@o.Amount.ToString("N0")</td>
+                            <td>@o.Probability%</td>
+                            <td class="text-secondary fw-semibold">₹@o.WeightedAmount.ToString("N0")</td>
+                            <td class="small">@o.ExpectedCloseDate.ToString("yyyy-MM-dd")</td>
+                            <td class="small">@o.OwnerName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

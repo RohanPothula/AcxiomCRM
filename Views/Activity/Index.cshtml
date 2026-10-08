@@ -1,0 +1,124 @@
+@model IEnumerable<AcxiomCRM.Models.Activity>
+@{
+    ViewData["Title"] = "Activity Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold mb-0">Activity History</h4>
+        <div class="text-muted small">Record and track calls, meetings, emails, and sales tasks</div>
+    </div>
+    <a asp-action="Create" class="btn btn-primary-crm">
+        <i class="bi bi-clock-history me-1"></i> Log Activity
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card-clean p-3 mb-3">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-3">
+            <select name="type" class="form-select form-select-sm">
+                <option value="">All Types</option>
+                @foreach (var tp in AcxiomCRM.Models.ActivityTypes.All)
+                {
+                    <option value="@tp" selected="@(ViewBag.Type == tp)">@tp</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select form-select-sm">
+                <option value="">All Statuses</option>
+                <option value="Completed" selected="@(ViewBag.Status == "Completed")">Completed</option>
+                <option value="InProgress" selected="@(ViewBag.Status == "InProgress")">In Progress</option>
+                <option value="Planned" selected="@(ViewBag.Status == "Planned")">Planned</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="date" name="date" value="@ViewBag.Date" class="form-control form-control-sm" />
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-sm btn-primary-crm">Filter</button>
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Table -->
+<div class="card-clean">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-journal-x"></i>
+            <div class="empty-state-title">No activities logged</div>
+            <div class="small">No activity entries match your filter criteria.</div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-crm">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Type</th>
+                        <th>Date & Time</th>
+                        <th>Associated Entity</th>
+                        <th>Status</th>
+                        <th>Logged By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@a.Subject</div>
+                                @if (!string.IsNullOrEmpty(a.Description))
+                                {
+                                    <div class="small text-muted">@a.Description</div>
+                                }
+                            </td>
+                            <td><span class="badge bg-light text-dark border">@a.ActivityType</span></td>
+                            <td class="small text-muted">@a.ActivityDate.ToString("dd MMM yyyy HH:mm")</td>
+                            <td class="small">
+                                @if (a.Customer != null)
+                                {
+                                    <span>Customer: <a asp-controller="Customer" asp-action="Details" asp-route-id="@a.CustomerId" class="text-decoration-none">@a.Customer.CustomerName</a></span>
+                                }
+                                else if (a.Lead != null)
+                                {
+                                    <span>Lead: <a asp-controller="Lead" asp-action="Details" asp-route-id="@a.LeadId" class="text-decoration-none">@a.Lead.LeadName</a></span>
+                                }
+                                else if (a.Opportunity != null)
+                                {
+                                    <span>Opportunity: <a asp-controller="Opportunity" asp-action="Details" asp-route-id="@a.OpportunityId" class="text-decoration-none">@a.Opportunity.OpportunityName</a></span>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td><span class="badge-clean badge-active">@a.Status</span></td>
+                            <td class="small">@(a.Assignee != null ? a.Assignee.FullName : "Unassigned")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="p-3 border-top d-flex justify-content-between align-items-center">
+                <span class="small text-muted">Page @ViewBag.CurrentPage of @ViewBag.TotalPages</span>
+                <ul class="pagination pagination-sm mb-0">
+                    @for (int p = 1; p <= ViewBag.TotalPages; p++)
+                    {
+                        <li class="page-item @(p == ViewBag.CurrentPage ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-type="@ViewBag.Type" asp-route-status="@ViewBag.Status" asp-route-date="@ViewBag.Date">@p</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+</div>

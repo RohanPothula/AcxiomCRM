@@ -1,0 +1,66 @@
+@model AcxiomCRM.Models.AuditLog
+@{
+    ViewData["Title"] = "Audit Log Details";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card-clean p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <h5 class="fw-bold mb-0">Audit Record #@Model.AuditLogId</h5>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to List</a>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 mb-2">
+                    <span class="text-muted small d-block">Action</span>
+                    <span class="fw-semibold">@Model.Action</span>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <span class="text-muted small d-block">Entity / Module</span>
+                    <span class="fw-semibold">@Model.EntityName</span>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <span class="text-muted small d-block">User</span>
+                    <span>@(Model.UserName ?? Model.UserId ?? "System")</span>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <span class="text-muted small d-block">IP Address</span>
+                    <span class="font-monospace">@(Model.IpAddress ?? "-")</span>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <span class="text-muted small d-block">Timestamp (UTC)</span>
+                    <span>@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <span class="text-muted small d-block">Result</span>
+                    <span class="badge-clean @(Model.Result == "Success" ? "badge-active" : "badge-lost")">@Model.Result</span>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Details))
+            {
+                <div class="mb-3">
+                    <span class="text-muted small d-block">Details</span>
+                    <div class="p-2 bg-light border rounded small">@Model.Details</div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.OldValue))
+            {
+                <div class="mb-3">
+                    <span class="text-muted small d-block">Previous Value</span>
+                    <pre class="p-2 bg-light border rounded small font-monospace">@Model.OldValue</pre>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.NewValue))
+            {
+                <div class="mb-3">
+                    <span class="text-muted small d-block">Updated / New Value</span>
+                    <pre class="p-2 bg-light border rounded small font-monospace">@Model.NewValue</pre>
+                </div>
+            }
+        </div>
+    </div>
+</div>

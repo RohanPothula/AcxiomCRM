@@ -1,0 +1,62 @@
+@model AcxiomCRM.ViewModels.EditUserViewModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card-clean p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <h5 class="fw-bold mb-0">Edit User: @Model.FullName</h5>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to List</a>
+            </div>
+
+            <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
+                    <input asp-for="FullName" class="form-control" required />
+                    <span asp-validation-for="FullName" class="field-validation-error"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+                    <input asp-for="Email" type="email" class="form-control" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Role" class="form-label small fw-semibold">Role <span class="text-danger">*</span></label>
+                    <select asp-for="Role" class="form-select">
+                        @foreach (var r in ViewBag.Roles as string[] ?? Array.Empty<string>())
+                        {
+                            <option value="@r" selected="@(Model.Role == r)">@r</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label asp-for="IsActive" class="form-check-label small fw-semibold">Active Account</label>
+                </div>
+
+                <div class="mb-4 form-check">
+                    <input asp-for="IsLockedOut" class="form-check-input" />
+                    <label asp-for="IsLockedOut" class="form-check-label small fw-semibold">Locked Out (uncheck to unlock)</label>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-secondary-crm">Cancel</a>
+                    <button type="submit" class="btn btn-primary-crm">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

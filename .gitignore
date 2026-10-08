@@ -1,0 +1,29 @@
+## Build and binary output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio & IDE files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vscode/
+
+## Environment and sensitive files
+.env
+.env.*
+*.local
+appsettings.Development.json
+secrets/
+*.txt.bak
+cookies.txt
+
+## OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

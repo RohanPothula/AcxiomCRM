@@ -1,0 +1,124 @@
+@model IEnumerable<AcxiomCRM.Models.AuditLog>
+@{
+    ViewData["Title"] = "Security & Audit Log";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold mb-0">Audit Log</h4>
+        <div class="text-muted small">Append-only security and business transaction trail</div>
+    </div>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card-clean p-3 mb-3">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-3">
+            <input type="text" name="userSearch" value="@ViewBag.UserSearch" class="form-control form-control-sm" placeholder="Search user..." />
+        </div>
+        <div class="col-md-2">
+            <select name="module" class="form-select form-select-sm">
+                <option value="">All Entities</option>
+                <option value="Customer" selected="@(ViewBag.Module == "Customer")">Customer</option>
+                <option value="Lead" selected="@(ViewBag.Module == "Lead")">Lead</option>
+                <option value="Opportunity" selected="@(ViewBag.Module == "Opportunity")">Opportunity</option>
+                <option value="FollowUp" selected="@(ViewBag.Module == "FollowUp")">FollowUp</option>
+                <option value="Activity" selected="@(ViewBag.Module == "Activity")">Activity</option>
+                <option value="User" selected="@(ViewBag.Module == "User")">User</option>
+                <option value="Auth" selected="@(ViewBag.Module == "Auth")">Auth</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="action" class="form-select form-select-sm">
+                <option value="">All Actions</option>
+                <option value="Login" selected="@(ViewBag.Action == "Login")">Login</option>
+                <option value="Failed Login" selected="@(ViewBag.Action == "Failed Login")">Failed Login</option>
+                <option value="Logout" selected="@(ViewBag.Action == "Logout")">Logout</option>
+                <option value="Create" selected="@(ViewBag.Action == "Create")">Create</option>
+                <option value="Update" selected="@(ViewBag.Action == "Update")">Update</option>
+                <option value="Delete" selected="@(ViewBag.Action == "Delete")">Delete</option>
+                <option value="Convert" selected="@(ViewBag.Action == "Convert")">Convert</option>
+                <option value="Role Change" selected="@(ViewBag.Action == "Role Change")">Role Change</option>
+                <option value="Security" selected="@(ViewBag.Action == "Security")">Security</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="startDate" value="@ViewBag.StartDate" class="form-control form-control-sm" title="From Date" />
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-sm btn-primary-crm">Filter</button>
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Table Card -->
+<div class="card-clean">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-journal-check"></i>
+            <div class="empty-state-title">No audit records found</div>
+            <div class="small">No logs match your filter criteria.</div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-crm">
+                <thead>
+                    <tr>
+                        <th>Timestamp (UTC)</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>Record ID</th>
+                        <th>Result</th>
+                        <th>IP Address</th>
+                        <th class="text-end">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model)
+                    {
+                        <tr>
+                            <td class="small text-muted">@a.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td class="small fw-semibold">@(a.UserName ?? a.UserId ?? "System")</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">@a.Action</span>
+                            </td>
+                            <td>@a.EntityName</td>
+                            <td class="font-monospace small">@(a.RecordId ?? "-")</td>
+                            <td>
+                                <span class="badge-clean @(a.Result == "Success" ? "badge-active" : "badge-lost")">
+                                    @a.Result
+                                </span>
+                            </td>
+                            <td class="font-monospace small text-muted">@(a.IpAddress ?? "-")</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@a.AuditLogId" class="btn btn-sm btn-outline-primary py-0 px-2" title="Inspect">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="p-3 border-top d-flex justify-content-between align-items-center">
+                <span class="small text-muted">Page @ViewBag.CurrentPage of @ViewBag.TotalPages</span>
+                <ul class="pagination pagination-sm mb-0">
+                    @for (int p = 1; p <= ViewBag.TotalPages; p++)
+                    {
+                        <li class="page-item @(p == ViewBag.CurrentPage ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-userSearch="@ViewBag.UserSearch" asp-route-module="@ViewBag.Module" asp-route-action="@ViewBag.Action">@p</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+</div>

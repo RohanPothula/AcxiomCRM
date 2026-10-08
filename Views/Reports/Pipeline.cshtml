@@ -1,0 +1,91 @@
+@model AcxiomCRM.ViewModels.PipelineReportViewModel
+@{
+    ViewData["Title"] = "Pipeline Report";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold mb-0">Pipeline Report</h4>
+        <div class="text-muted small">Stage-wise and sales rep-wise breakdown of gross and probability-weighted pipeline</div>
+    </div>
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-printer me-1"></i> Print / Export
+        </button>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to Reports</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="metric-card">
+            <div class="metric-title">Gross Active Pipeline</div>
+            <div class="metric-value">₹@Model.TotalPipelineAmount.ToString("N0")</div>
+            <div class="metric-sub text-muted">Sum of active open deal amounts</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="metric-card">
+            <div class="metric-title">Weighted Active Pipeline</div>
+            <div class="metric-value text-primary">₹@Model.TotalWeightedPipelineAmount.ToString("N0")</div>
+            <div class="metric-sub text-muted">Amount &times; Probability / 100</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Stage Breakdown -->
+    <div class="col-lg-6">
+        <div class="card-clean p-3">
+            <h6 class="fw-bold border-bottom pb-2 mb-3">Stage-Wise Pipeline</h6>
+            <div class="table-responsive">
+                <table class="table-crm">
+                    <thead>
+                        <tr>
+                            <th>Pipeline Stage</th>
+                            <th>Gross Amount (₹)</th>
+                            <th>Weighted Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var kvp in Model.StageWiseAmounts)
+                        {
+                            decimal weighted = Model.StageWiseWeightedAmounts.TryGetValue(kvp.Key, out var w) ? w : 0;
+                            <tr>
+                                <td class="fw-semibold">@kvp.Key</td>
+                                <td>₹@kvp.Value.ToString("N0")</td>
+                                <td class="text-secondary fw-semibold">₹@weighted.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Owner Breakdown -->
+    <div class="col-lg-6">
+        <div class="card-clean p-3">
+            <h6 class="fw-bold border-bottom pb-2 mb-3">Account Owner Pipeline</h6>
+            <div class="table-responsive">
+                <table class="table-crm">
+                    <thead>
+                        <tr>
+                            <th>Sales Executive</th>
+                            <th>Active Deal Value (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var kvp in Model.OwnerWiseAmounts)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@kvp.Key</td>
+                                <td>₹@kvp.Value.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

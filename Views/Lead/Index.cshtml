@@ -1,0 +1,144 @@
+@model IEnumerable<AcxiomCRM.Models.Lead>
+@{
+    ViewData["Title"] = "Lead Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold mb-0">Leads</h4>
+        <div class="text-muted small">Capture prospects, qualify opportunities, and execute lead conversions</div>
+    </div>
+    <a asp-action="Create" class="btn btn-primary-crm">
+        <i class="bi bi-funnel me-1"></i> New Lead
+    </a>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card-clean p-3 mb-3">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Search name, company, email, phone..." />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select form-select-sm">
+                <option value="">All Statuses</option>
+                @foreach (var st in AcxiomCRM.Models.LeadStatuses.All)
+                {
+                    <option value="@st" selected="@(ViewBag.Status == st)">@st</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="assignedTo" asp-items="ViewBag.UsersList" class="form-select form-select-sm">
+                <option value="">All Sales Executives</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-sm btn-primary-crm">Filter</button>
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Table Card -->
+<div class="card-clean">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-funnel"></i>
+            <div class="empty-state-title">No leads found</div>
+            <div class="small">No prospect leads match your filter or search criteria.</div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table-crm">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>
+                            <a asp-action="Index" asp-route-sortOrder="@ViewBag.NameSortParm" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status" class="text-decoration-none text-dark">
+                                Lead Name <i class="bi bi-arrow-down-up small"></i>
+                            </a>
+                        </th>
+                        <th>Company</th>
+                        <th>Contact</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th>Expected Value</th>
+                        <th>Assigned To</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var l in Model)
+                    {
+                        <tr>
+                            <td class="font-monospace small text-muted">@l.LeadCode</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@l.LeadId" class="fw-semibold text-decoration-none text-primary">
+                                    @l.LeadName
+                                </a>
+                            </td>
+                            <td>@(l.CompanyName ?? "-")</td>
+                            <td class="small">
+                                <div>@l.Email</div>
+                                <div class="text-muted">@l.Phone</div>
+                            </td>
+                            <td class="small">@(l.Source ?? "-")</td>
+                            <td>
+                                @{
+                                    string badgeClass = l.Status switch
+                                    {
+                                        "New" => "badge-new",
+                                        "Contacted" => "badge-contacted",
+                                        "Qualified" => "badge-qualified",
+                                        "Converted" => "badge-converted",
+                                        "Lost" => "badge-lost",
+                                        _ => "badge-inactive"
+                                    };
+                                }
+                                <span class="badge-clean @badgeClass">@l.Status</span>
+                            </td>
+                            <td class="fw-semibold">₹@l.ExpectedValue.ToString("N0")</td>
+                            <td class="small">@(l.Assignee != null ? l.Assignee.FullName : "Unassigned")</td>
+                            <td class="text-end">
+                                @if (l.Status != AcxiomCRM.Models.LeadStatuses.Converted)
+                                {
+                                    <a asp-action="Convert" asp-route-id="@l.LeadId" class="btn btn-sm btn-success py-0 px-2" title="Convert to Customer/Opportunity">
+                                        <i class="bi bi-arrow-repeat"></i> Convert
+                                    </a>
+                                }
+                                <a asp-action="Edit" asp-route-id="@l.LeadId" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="Details" asp-route-id="@l.LeadId" class="btn btn-sm btn-outline-primary py-0 px-2" title="Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (ViewBag.TotalPages > 1)
+        {
+            <div class="p-3 border-top d-flex justify-content-between align-items-center">
+                <span class="small text-muted">Page @ViewBag.CurrentPage of @ViewBag.TotalPages</span>
+                <ul class="pagination pagination-sm mb-0">
+                    @for (int p = 1; p <= ViewBag.TotalPages; p++)
+                    {
+                        <li class="page-item @(p == ViewBag.CurrentPage ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status" asp-route-assignedTo="@ViewBag.AssignedTo" asp-route-sortOrder="@ViewBag.CurrentSort">@p</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+</div>

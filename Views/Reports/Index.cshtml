@@ -1,0 +1,106 @@
+@{
+    ViewData["Title"] = "CRM Reports";
+    string role = ViewBag.UserRole as string ?? "";
+    bool isAdminOrManager = role == AcxiomCRM.Models.Roles.Admin || role == AcxiomCRM.Models.Roles.Manager;
+}
+
+<div class="mb-4">
+    <h4 class="fw-bold mb-0">Business Reports</h4>
+    <div class="text-muted small">Standard management and analytical reports generated directly from database transactions</div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6 col-lg-4">
+        <div class="card-clean p-3 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-people text-primary fs-5"></i>
+                    <h6 class="fw-bold mb-0">Customer Report</h6>
+                </div>
+                <p class="small text-muted mb-3">View customer portfolio status, owner distribution, and creation chronology.</p>
+            </div>
+            <a asp-action="Customers" class="btn btn-sm btn-outline-primary w-100">Open Customer Report</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card-clean p-3 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-funnel text-primary fs-5"></i>
+                    <h6 class="fw-bold mb-0">Lead Report</h6>
+                </div>
+                <p class="small text-muted mb-3">Analyze lead acquisition sources, status distribution, and sales rep allocation.</p>
+            </div>
+            <a asp-action="Leads" class="btn btn-sm btn-outline-primary w-100">Open Lead Report</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card-clean p-3 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-calendar-check text-primary fs-5"></i>
+                    <h6 class="fw-bold mb-0">Follow-Up Report</h6>
+                </div>
+                <p class="small text-muted mb-3">Monitor scheduled, completed, missed, and overdue communications.</p>
+            </div>
+            <a asp-action="FollowUps" class="btn btn-sm btn-outline-primary w-100">Open Follow-Up Report</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card-clean p-3 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-graph-up-arrow text-primary fs-5"></i>
+                    <h6 class="fw-bold mb-0">Opportunity Report</h6>
+                </div>
+                <p class="small text-muted mb-3">Inspect deal sizes, pipeline stages, win probabilities, and expected close dates.</p>
+            </div>
+            <a asp-action="Opportunities" class="btn btn-sm btn-outline-primary w-100">Open Opportunity Report</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card-clean p-3 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-diagram-3 text-primary fs-5"></i>
+                    <h6 class="fw-bold mb-0">Pipeline Report</h6>
+                </div>
+                <p class="small text-muted mb-3">Stage-wise and sales rep-wise breakdown of gross and weighted pipeline values.</p>
+            </div>
+            <a asp-action="Pipeline" class="btn btn-sm btn-outline-primary w-100">Open Pipeline Report</a>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card-clean p-3 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-arrow-repeat text-primary fs-5"></i>
+                    <h6 class="fw-bold mb-0">Conversion & Win Rate</h6>
+                </div>
+                <p class="small text-muted mb-3">Lead-to-customer conversion rates and opportunity win/loss performance.</p>
+            </div>
+            <a asp-action="Conversion" class="btn btn-sm btn-outline-primary w-100">Open Conversion Report</a>
+        </div>
+    </div>
+
+    @if (isAdminOrManager)
+    {
+        <div class="col-md-6 col-lg-4">
+            <div class="card-clean p-3 h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-person-lines-fill text-primary fs-5"></i>
+                        <h6 class="fw-bold mb-0">User Activity Report</h6>
+                    </div>
+                    <p class="small text-muted mb-3">Productivity counts by user: leads handled, deals assigned, and activities logged.</p>
+                </div>
+                <a asp-action="UserActivity" class="btn btn-sm btn-outline-primary w-100">Open User Activity Report</a>
+            </div>
+        </div>
+    }
+</div>

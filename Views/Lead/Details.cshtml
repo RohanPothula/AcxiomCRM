@@ -1,0 +1,182 @@
+@model AcxiomCRM.Models.Lead
+@{
+    ViewData["Title"] = "Lead Details";
+    var audits = ViewBag.AuditHistory as List<AcxiomCRM.Models.AuditLog> ?? new List<AcxiomCRM.Models.AuditLog>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold mb-0">@Model.LeadName</h4>
+        <div class="text-muted small">Lead Code: <code>@Model.LeadCode</code> &middot; Status: <span class="badge bg-light text-dark border">@Model.Status</span></div>
+    </div>
+    <div class="d-flex gap-2">
+        @if (Model.Status != AcxiomCRM.Models.LeadStatuses.Converted)
+        {
+            <a asp-action="Convert" asp-route-id="@Model.LeadId" class="btn btn-sm btn-success">
+                <i class="bi bi-arrow-repeat me-1"></i> Convert Lead
+            </a>
+        }
+        else if (Model.ConvertedCustomerId.HasValue)
+        {
+            <a asp-controller="Customer" asp-action="Details" asp-route-id="@Model.ConvertedCustomerId.Value" class="btn btn-sm btn-outline-success">
+                <i class="bi bi-person-check me-1"></i> View Converted Customer
+            </a>
+        }
+        <a asp-action="Edit" asp-route-id="@Model.LeadId" class="btn btn-sm btn-primary-crm">Edit Lead</a>
+        <a asp-controller="FollowUp" asp-action="Create" asp-route-leadId="@Model.LeadId" class="btn btn-sm btn-outline-secondary">+ Follow-Up</a>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card-clean p-3 mb-3">
+            <h6 class="fw-bold border-bottom pb-2 mb-3">Prospect Info</h6>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Company Name</span>
+                <span class="fw-semibold">@(Model.CompanyName ?? "-")</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Email</span>
+                <span class="fw-semibold">@Model.Email</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Phone</span>
+                <span class="fw-semibold">@Model.Phone</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Source</span>
+                <span>@(Model.Source ?? "-")</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Priority</span>
+                <span class="badge bg-light text-dark border">@Model.Priority</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Expected Value</span>
+                <span class="fw-bold text-primary">₹@Model.ExpectedValue.ToString("N0")</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Assigned To</span>
+                <span class="fw-semibold">@(Model.Assignee?.FullName ?? "Unassigned")</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Created Date</span>
+                <span class="small text-muted">@Model.CreatedDate.ToString("dd MMM yyyy HH:mm") UTC</span>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div class="mb-2 border-top pt-2">
+                    <span class="text-muted small d-block">Notes</span>
+                    <span class="small">@Model.Notes</span>
+                </div>
+            }
+        </div>
+
+        <!-- Audit History -->
+        <div class="card-clean p-3">
+            <h6 class="fw-bold border-bottom pb-2 mb-2">Audit History</h6>
+            @if (!audits.Any())
+            {
+                <div class="small text-muted py-2">No audit records found.</div>
+            }
+            else
+            {
+                <div class="small">
+                    @foreach (var a in audits)
+                    {
+                        <div class="border-bottom py-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-semibold text-primary">@a.Action</span>
+                                <span class="text-muted" style="font-size: 0.75rem;">@a.CreatedDate.ToString("dd MMM HH:mm")</span>
+                            </div>
+                            <div class="text-muted">By: @(a.UserName ?? "System")</div>
+                            @if (!string.IsNullOrEmpty(a.Details))
+                            {
+                                <div class="text-secondary mt-1">@a.Details</div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <!-- Follow-ups -->
+        <div class="card-clean mb-3">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">Follow-Ups (@Model.FollowUps.Count)</h6>
+                <a asp-controller="FollowUp" asp-action="Create" asp-route-leadId="@Model.LeadId" class="small text-decoration-none">+ Schedule</a>
+            </div>
+            @if (!Model.FollowUps.Any())
+            {
+                <div class="p-3 text-muted small">No follow-ups scheduled for this lead.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table-crm">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var f in Model.FollowUps)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@f.Subject</td>
+                                    <td>@f.FollowUpType</td>
+                                    <td class="small">@f.FollowUpDate.ToString("dd MMM yyyy HH:mm")</td>
+                                    <td><span class="badge bg-light text-dark border">@f.Status</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <!-- Activities -->
+        <div class="card-clean">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">Activities (@Model.Activities.Count)</h6>
+                <a asp-controller="Activity" asp-action="Create" asp-route-leadId="@Model.LeadId" class="small text-decoration-none">+ Log Activity</a>
+            </div>
+            @if (!Model.Activities.Any())
+            {
+                <div class="p-3 text-muted small">No activities logged for this lead.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table-crm">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var a in Model.Activities)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@a.Subject</td>
+                                    <td>@a.ActivityType</td>
+                                    <td class="small">@a.ActivityDate.ToString("dd MMM yyyy HH:mm")</td>
+                                    <td>@a.Status</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

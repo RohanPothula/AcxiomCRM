@@ -1,0 +1,198 @@
+@model AcxiomCRM.Models.Customer
+@{
+    ViewData["Title"] = "Customer Details";
+    var audits = ViewBag.AuditHistory as List<AcxiomCRM.Models.AuditLog> ?? new List<AcxiomCRM.Models.AuditLog>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="fw-bold mb-0">@Model.CustomerName</h4>
+        <div class="text-muted small">Customer Code: <code>@Model.CustomerCode</code> &middot; Status: <span class="badge-clean @(Model.Status == "Active" ? "badge-active" : "badge-inactive")">@Model.Status</span></div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.CustomerId" class="btn btn-sm btn-primary-crm">Edit Customer</a>
+        <a asp-controller="Opportunity" asp-action="Create" asp-route-customerId="@Model.CustomerId" class="btn btn-sm btn-outline-primary">+ Opportunity</a>
+        <a asp-controller="FollowUp" asp-action="Create" asp-route-customerId="@Model.CustomerId" class="btn btn-sm btn-outline-secondary">+ Follow-Up</a>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Customer Info Card -->
+    <div class="col-lg-4">
+        <div class="card-clean p-3 mb-3">
+            <h6 class="fw-bold border-bottom pb-2 mb-3">Account Details</h6>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Company Name</span>
+                <span class="fw-semibold">@(Model.CompanyName ?? "-")</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Email</span>
+                <span class="fw-semibold">@Model.Email</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Phone</span>
+                <span class="fw-semibold">@Model.Phone</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Address</span>
+                <span>@Model.Address, @Model.City, @Model.State</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Assigned Account Owner</span>
+                <span class="fw-semibold">@(Model.Owner?.FullName ?? "Unassigned")</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-muted small d-block">Created Date</span>
+                <span class="small text-muted">@Model.CreatedDate.ToString("dd MMM yyyy HH:mm") UTC</span>
+            </div>
+        </div>
+
+        <!-- Audit History -->
+        <div class="card-clean p-3">
+            <h6 class="fw-bold border-bottom pb-2 mb-2">Audit History</h6>
+            @if (!audits.Any())
+            {
+                <div class="small text-muted py-2">No audit records found.</div>
+            }
+            else
+            {
+                <div class="small">
+                    @foreach (var a in audits)
+                    {
+                        <div class="border-bottom py-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-semibold text-primary">@a.Action</span>
+                                <span class="text-muted" style="font-size: 0.75rem;">@a.CreatedDate.ToString("dd MMM HH:mm")</span>
+                            </div>
+                            <div class="text-muted">By: @(a.UserName ?? "System")</div>
+                            @if (!string.IsNullOrEmpty(a.Details))
+                            {
+                                <div class="text-secondary mt-1">@a.Details</div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Related CRM Records -->
+    <div class="col-lg-8">
+        <!-- Opportunities -->
+        <div class="card-clean mb-3">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">Opportunities (@Model.Opportunities.Count)</h6>
+                <a asp-controller="Opportunity" asp-action="Create" asp-route-customerId="@Model.CustomerId" class="small text-decoration-none">+ Add</a>
+            </div>
+            @if (!Model.Opportunities.Any())
+            {
+                <div class="p-3 text-muted small">No opportunities linked with this customer.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table-crm">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Stage</th>
+                                <th>Amount</th>
+                                <th>Probability</th>
+                                <th>Close Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var o in Model.Opportunities)
+                            {
+                                <tr>
+                                    <td><a asp-controller="Opportunity" asp-action="Details" asp-route-id="@o.OpportunityId" class="text-decoration-none fw-semibold">@o.OpportunityName</a></td>
+                                    <td><span class="badge bg-light text-dark border">@o.Stage</span></td>
+                                    <td>₹@o.Amount.ToString("N0")</td>
+                                    <td>@o.Probability%</td>
+                                    <td class="small">@o.ExpectedCloseDate.ToString("dd MMM yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <!-- Follow-ups -->
+        <div class="card-clean mb-3">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">Scheduled Follow-Ups (@Model.FollowUps.Count)</h6>
+                <a asp-controller="FollowUp" asp-action="Create" asp-route-customerId="@Model.CustomerId" class="small text-decoration-none">+ Schedule</a>
+            </div>
+            @if (!Model.FollowUps.Any())
+            {
+                <div class="p-3 text-muted small">No follow-ups scheduled.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table-crm">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var f in Model.FollowUps)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@f.Subject</td>
+                                    <td>@f.FollowUpType</td>
+                                    <td class="small">@f.FollowUpDate.ToString("dd MMM yyyy HH:mm")</td>
+                                    <td><span class="badge bg-light text-dark border">@f.Status</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <!-- Activities -->
+        <div class="card-clean">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0">Activities Log (@Model.Activities.Count)</h6>
+                <a asp-controller="Activity" asp-action="Create" asp-route-customerId="@Model.CustomerId" class="small text-decoration-none">+ Log Activity</a>
+            </div>
+            @if (!Model.Activities.Any())
+            {
+                <div class="p-3 text-muted small">No customer activities logged.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table-crm">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var a in Model.Activities)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@a.Subject</td>
+                                    <td><span class="badge bg-light text-dark border">@a.ActivityType</span></td>
+                                    <td class="small">@a.ActivityDate.ToString("dd MMM yyyy HH:mm")</td>
+                                    <td>@a.Status</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
